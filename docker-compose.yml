@@ -18,6 +18,14 @@ services:
         volumes:
             - ${SYMFONY_APP_PATH}:/var/www/symfony
             - ./logs/symfony:/var/www/symfony/app/logs
+    elixir:
+        build:
+            context: elixir
+            args:
+                TIMEZONE: ${TIMEZONE}
+        volumes:
+            - ${PHOENIX_APP_PATH}:/var/www/elixir
+            - ./logs/elixir:/var/www/elixir/app/logs
     nginx:
         build: nginx
         ports:
@@ -26,13 +34,23 @@ services:
             - php
         volumes:
             - ./logs/nginx/:/var/log/nginx
-    elk:
-        image: willdurand/elk
+    rabbitmq:
+        image: "rabbitmq:3.7-management"
+        hostname: "rabbit"
         ports:
-            - 81:80
+            - "15672:15672"
+            - "5672:5672"
+        labels:
+            NAME: "rabbitmq"
         volumes:
-            - ./elk/logstash:/etc/logstash
-            - ./elk/logstash/patterns:/opt/logstash/patterns
-        volumes_from:
-            - php
-            - nginx
+            - ../rabbitmq-isolated.conf:/etc/rabbitmq/rabbitmq.config
+#    elk:
+#        image: willdurand/elk
+#        ports:
+#            - 81:80
+#        volumes:
+#            - ./elk/logstash:/etc/logstash
+#            - ./elk/logstash/patterns:/opt/logstash/patterns
+#        volumes_from:
+#            - php
+#            - nginx
