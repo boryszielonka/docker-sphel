@@ -23,19 +23,21 @@ services:
             context: elixir
             args:
                 TIMEZONE: ${TIMEZONE}
+        ports:
+            - 4040:4000
         volumes:
-            - ${PHOENIX_APP_PATH}:/var/www/elixir
-            - ./logs/elixir:/var/www/elixir/app/logs
+            - ${PHOENIX_APP_PATH}:/var/www/phoenix_app
+            - ./logs/elixir:/var/www/phoenix_app/logs
     nginx:
         build: nginx
         ports:
-            - 80:80
+            - 8080:80
         volumes_from:
             - php
         volumes:
             - ./logs/nginx/:/var/log/nginx
     rabbitmq:
-        image: "rabbitmq:3.7-management"
+        image: "rabbitmq:3.8-management"
         hostname: "rabbit"
         ports:
             - "15672:15672"
@@ -44,13 +46,6 @@ services:
             NAME: "rabbitmq"
         volumes:
             - ../rabbitmq-isolated.conf:/etc/rabbitmq/rabbitmq.config
-#    elk:
-#        image: willdurand/elk
-#        ports:
-#            - 81:80
-#        volumes:
-#            - ./elk/logstash:/etc/logstash
-#            - ./elk/logstash/patterns:/opt/logstash/patterns
-#        volumes_from:
-#            - php
-#            - nginx
+        environment:
+            RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+            RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
